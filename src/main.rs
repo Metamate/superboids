@@ -2,7 +2,11 @@ mod boid;
 use boid::Boid;
 use nannou::prelude::*;
 
-const NO_OF_BOIDS: u16 = 1000;
+const NO_BOIDS: u16 = 1000;
+
+const ALIGNMENT: f32 = 1.;
+const COHESION: f32 = 1.;
+const SEPARATION: f32 = 1.;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -17,13 +21,14 @@ fn model(app: &App) -> Model {
     let _window = app.new_window().view(view).build().unwrap();
     let mut boids = Vec::new();
 
-    let boundary = app.window_rect().l_r_b_t();
-    for _n in 0..NO_OF_BOIDS {
-        let random = (
-            random_range(boundary.0, boundary.1),
-            random_range(boundary.2, boundary.3),
+    let (left, right, bottom, top) = app.window_rect().l_r_b_t();
+    for _n in 0..NO_BOIDS {
+        let boid = Boid::new(
+            random_range(left, right),
+            random_range(bottom, top),
+            10.,
+            10.,
         );
-        let boid = Boid::new(random.0, random.1);
         boids.push(boid);
     }
 
@@ -31,11 +36,20 @@ fn model(app: &App) -> Model {
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
-    let boids = model.boids.clone();
-    for boid in model.boids.iter_mut() {
-        boid.update(app, boids.clone());
+    let (left, right, bottom, top) = app.window_rect().l_r_b_t();
+
+    for i in 0..model.boids.len() {
+        let local_boids = model.boids[i].local_boids(&model.boids);
+        let alignment = model.boids[i].alignment(&local_boids);
+        let cohesion = model.boids[i].cohesion(&local_boids);
+        let separation = model.boids[i].separation(&local_boids);
+
+        model.boids[i].acceleration +=
+            alignment * ALIGNMENT + cohesion * COHESION + separation * SEPARATION;
+        model.boids[i].update();
+        model.boids[i].contain(left, right, bottom, top);
     }
-    println!("{:?}", 1. / _update.since_last.as_secs_f64());
+    // println!("{:?}", 1. / _update.since_last.as_secs_f64());
 }
 
 fn view(app: &App, _model: &Model, frame: Frame) {
