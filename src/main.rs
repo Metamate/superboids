@@ -49,7 +49,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         model.boids[i].update();
         model.boids[i].contain(left, right, bottom, top);
     }
-    println!("{:?}", 1. / _update.since_last.as_secs_f64());
+    //println!("{:?}", 1. / _update.since_last.as_secs_f64());
 }
 
 fn view(app: &App, _model: &Model, frame: Frame) {
