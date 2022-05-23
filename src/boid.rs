@@ -2,7 +2,7 @@ use std::ops::{Div, Sub};
 
 use nannou::prelude::*;
 
-const PERCEPTION_RADIUS: f32 = 100.;
+const PERCEPTION_RADIUS: f32 = 50.;
 
 #[derive(PartialEq, Copy, Clone)]
 pub struct Boid {
@@ -43,7 +43,7 @@ impl Boid {
     }
 
     pub fn show(&self, draw: &Draw) {
-        draw.ellipse()
+        draw.tri()
             .x_y(self.position.x, self.position.y)
             .w_h(self.width, self.height)
             .rotate(self.velocity.angle())
@@ -94,7 +94,6 @@ impl Boid {
             .fold(Vec2::ZERO, |sum, boid| sum + boid.position)
             .div(len as f32)
             .sub(self.position)
-            .sub(self.velocity)
     }
 
     pub fn separation(&self, local_boids: &Vec<&Boid>) -> Vec2 {
@@ -102,15 +101,11 @@ impl Boid {
         if len == 0 {
             return Vec2::ZERO;
         }
-        local_boids
-            .iter()
-            .fold(Vec2::ZERO, |sum, boid| {
-                sum + self
-                    .position
-                    .sub(boid.position)
-                    .div(self.position.distance(boid.position))
-            })
-            .div(len as f32)
-            .sub(self.velocity)
+        local_boids.iter().fold(Vec2::ZERO, |sum, boid| {
+            let distance = self.position.distance(boid.position);
+            let inverse_magnitude = if distance != 0. { distance } else { f32::MIN };
+
+            sum - boid.position.sub(self.position).div(inverse_magnitude)
+        })
     }
 }

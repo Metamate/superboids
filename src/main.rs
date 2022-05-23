@@ -2,10 +2,10 @@ mod boid;
 use boid::Boid;
 use nannou::prelude::*;
 
-const NO_BOIDS: u16 = 1000;
+const NO_BOIDS: u16 = 100;
 
 const ALIGNMENT: f32 = 1.;
-const COHESION: f32 = 1.;
+const COHESION: f32 = 0.05;
 const SEPARATION: f32 = 1.;
 
 fn main() {
@@ -26,8 +26,8 @@ fn model(app: &App) -> Model {
         let boid = Boid::new(
             random_range(left, right),
             random_range(bottom, top),
-            10.,
-            10.,
+            15.,
+            15.,
         );
         boids.push(boid);
     }
@@ -49,7 +49,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         model.boids[i].update();
         model.boids[i].contain(left, right, bottom, top);
     }
-    // println!("{:?}", 1. / _update.since_last.as_secs_f64());
+    println!("{:?}", 1. / _update.since_last.as_secs_f64());
 }
 
 fn view(app: &App, _model: &Model, frame: Frame) {
